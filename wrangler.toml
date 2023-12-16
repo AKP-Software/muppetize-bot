@@ -1,0 +1,27 @@
+name = "muppetize-bot-dev"
+main = "src/worker.ts"
+compatibility_date = "2023-05-17"
+send_metrics = false
+workers_dev = false
+route = { pattern = "muppetize-bot-dev.akp.services/*", zone_id = "63860893ce257a1d73db92ef5098957b" }
+logpush = true
+
+queues.producers = [{ queue = "muppetize-queue-prod", binding = "MUPPETIZE_QUEUE" }]
+queues.consumers = [{ queue = "muppetize-queue-prod", max_batch_size = 1, max_batch_timeout = 1, max_retries = 3, dead_letter_queue = "muppetize-queue-prod-dlq", max_concurrency = 20 }]
+kv_namespaces = [{ binding = "CONFIG", id = "0185ad75a7724de498433f8bc12d64f2", preview_id = "e9e28754d5fc468284bb49b6f85616d3" }]
+
+[vars]
+APPLICATION_ID = "1183948520382804089"
+PUBLIC_KEY = "b09511923f1817f08c11725d3836508861a411971efb78c96bfd64e9756dab86"
+TEST_GUILD_ID = "1184275829635690586"
+ENVIRONMENT = "development"
+
+[env.production]
+name = "muppetize-bot"
+route = { pattern = "muppetize-bot-prod.akp.services/*", zone_id = "63860893ce257a1d73db92ef5098957b" }
+vars = { ENVIRONMENT = "production", APPLICATION_ID = "1183948520382804089", PUBLIC_KEY = "b09511923f1817f08c11725d3836508861a411971efb78c96bfd64e9756dab86", TEST_GUILD_ID = "1184275829635690586" }
+logpush = true
+
+queues.producers = [{ queue = "muppetize-queue-prod", binding = "MUPPETIZE_QUEUE" }]
+queues.consumers = [{ queue = "muppetize-queue-prod", max_batch_size = 1, max_batch_timeout = 1, max_retries = 3, dead_letter_queue = "muppetize-queue-prod-dlq", max_concurrency = 20 }]
+kv_namespaces = [{ binding = "CONFIG", id = "0185ad75a7724de498433f8bc12d64f2", preview_id = "e9e28754d5fc468284bb49b6f85616d3" }]
