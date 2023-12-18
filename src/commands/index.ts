@@ -1,7 +1,5 @@
 import muppetize from './muppetize';
-import muppetizeMessage from './muppetizeMessage';
-import muppetizeMessageDM from './muppetizeMessageDM';
-import muppetizeUser from './muppetizeUser';
-import muppetizeUserDM from './muppetizeUserDM';
+import muppetizeMessageCommands from './muppetizeMessage';
+import muppetizeUserCommands from './muppetizeUser';
 
-export default [muppetize, muppetizeMessage, muppetizeMessageDM, muppetizeUser, muppetizeUserDM];
+export default [muppetize, ...muppetizeMessageCommands, ...muppetizeUserCommands];

@@ -18,6 +18,14 @@ const MUPPETIZE_USER_COMMAND: ApplicationCommand = {
   integration_types: [0, 1],
 } as ApplicationCommand; // jank lol
 
+const MUPPETIZE_USER_DM_COMMAND: ApplicationCommand = {
+  name: 'Muppetize to DM',
+  type: ApplicationCommandType.User,
+  default_member_permissions: '2048',
+  contexts: [0, 1, 2],
+  integration_types: [0, 1],
+} as ApplicationCommand; // jank lol
+
 const muppetizeUserHandler = async (
   interaction: APIApplicationCommandInteraction,
   env: Env,
@@ -25,6 +33,12 @@ const muppetizeUserHandler = async (
 ): Promise<APIInteractionResponse | void> => {
   if (!isContextMenuApplicationCommandInteraction(interaction)) {
     return errorResponse;
+  }
+
+  let sendToDM = false;
+
+  if (interaction.data.name === 'Muppetize to DM') {
+    sendToDM = true;
   }
 
   const targetUser = interaction.data.target_id;
@@ -56,10 +70,16 @@ const muppetizeUserHandler = async (
     env
   );
 
-  await enqueueMessage({ interaction, attachment: { url: avatarUrl } as APIAttachment, user_id: targetUser }, env);
+  await enqueueMessage({ interaction, attachment: { url: avatarUrl } as APIAttachment, user_id: targetUser, sendToDM }, env);
 };
 
-export default {
-  definition: MUPPETIZE_USER_COMMAND,
-  handler: muppetizeUserHandler,
-};
+export default [
+  {
+    definition: MUPPETIZE_USER_COMMAND,
+    handler: muppetizeUserHandler,
+  },
+  {
+    definition: MUPPETIZE_USER_DM_COMMAND,
+    handler: muppetizeUserHandler,
+  },
+];
