@@ -1,7 +1,10 @@
 import { APIApplicationCommandInteraction, ApplicationCommandOptionType } from 'discord-api-types/v10';
 import { APIInteractionResponse, APIAttachment, ApplicationCommandType } from 'discord-api-types/payloads/v10';
 import { ApplicationCommand } from '../types';
-import { editOriginalResponse, enqueueMessage, isAttachmentValidForOpenAI, resolveOption } from '../utils';
+import { resolveOption } from '../utils/InteractionOptions';
+import { isAttachmentValidForOpenAI } from '../utils/OpenAIHelpers';
+import { editOriginalResponse } from '../utils/InteractionResponses';
+import { enqueueMessage } from '../utils/CloudflareHelpers';
 
 const MUPPETIZE_COMMAND: ApplicationCommand = {
   name: 'muppetize',

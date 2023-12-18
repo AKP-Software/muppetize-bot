@@ -1,11 +1,12 @@
 import { Router } from 'itty-router';
 import { verifyKey } from 'discord-interactions';
-import { JsonResponse, getMuppetsAndRespond } from './utils';
 import commands from './commands';
 import components from './components';
 import { registerCommands } from './registerCommands';
 import { APIInteraction } from 'discord-api-types/v10';
 import { InteractionType, InteractionResponseType, MessageFlags, ApplicationCommandType } from 'discord-api-types/payloads/v10';
+import { JsonResponse } from './utils/JsonResponse';
+import { getMuppetsAndRespond, isUserAllowed } from './utils/GenericUtils';
 
 const router = Router();
 const notFoundResponse = () => new Response('Not Found.', { status: 404 });
@@ -95,6 +96,15 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
 
     if (!handler) {
       return notFoundResponse();
+    }
+
+    const user = message?.member?.user ?? message?.user;
+
+    if (user == null || !isUserAllowed(user, env)) {
+      return new JsonResponse({
+        type: InteractionResponseType.ChannelMessageWithSource,
+        data: { content: 'You are not allowed to use this command.', flags: MessageFlags.Ephemeral },
+      });
     }
 
     ctx.waitUntil(handler(message, env, ctx));

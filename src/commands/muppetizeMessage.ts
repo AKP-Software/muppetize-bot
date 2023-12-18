@@ -5,8 +5,10 @@ import {
   APIMessageApplicationCommandInteractionDataResolved,
 } from 'discord-api-types/payloads/v10';
 import { ApplicationCommand } from '../types';
-import { editOriginalResponse, enqueueMessage, errorResponse, getMuppetsAndRespond, isAttachmentValidForOpenAI } from '../utils';
 import { isContextMenuApplicationCommandInteraction } from 'discord-api-types/utils/v10';
+import { editOriginalResponse, errorResponse } from '../utils/InteractionResponses';
+import { isAttachmentValidForOpenAI } from '../utils/OpenAIHelpers';
+import { enqueueMessage } from '../utils/CloudflareHelpers';
 
 const MUPPETIZE_MESSAGE_COMMAND: ApplicationCommand = {
   name: 'Muppetize',

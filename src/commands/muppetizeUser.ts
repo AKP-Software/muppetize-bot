@@ -6,8 +6,9 @@ import {
   APIAttachment,
 } from 'discord-api-types/payloads/v10';
 import { ApplicationCommand } from '../types';
-import { editOriginalResponse, enqueueMessage, errorResponse, getMuppetsAndRespond } from '../utils';
 import { isContextMenuApplicationCommandInteraction } from 'discord-api-types/utils/v10';
+import { editOriginalResponse, errorResponse } from '../utils/InteractionResponses';
+import { enqueueMessage } from '../utils/CloudflareHelpers';
 
 const MUPPETIZE_USER_COMMAND: ApplicationCommand = {
   name: 'Muppetize',

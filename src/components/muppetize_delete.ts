@@ -1,7 +1,7 @@
 import { APIInteractionResponse, APIMessageComponentInteraction } from 'discord-api-types/v10';
-import { deleteFollowUp, errorResponse } from '../utils';
 import { ButtonStyleTypes, MessageComponentTypes } from 'discord-interactions';
 import { ComponentContext } from '../types';
+import { deleteFollowUp, errorResponse } from '../utils/InteractionResponses';
 
 const handler = async (
   interaction: APIMessageComponentInteraction,
