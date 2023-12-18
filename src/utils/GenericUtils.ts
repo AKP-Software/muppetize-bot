@@ -6,6 +6,7 @@ import { respondToOriginalWithAttachments, sendToDMWithAttachments } from './Res
 import { MessageComponentTypes } from 'discord-interactions';
 
 import components from '../components';
+import { APIUserWithStaffFlag } from '../types';
 
 export const MUPPETIZE_COMPONENTS = components.filter((c) => c.name.startsWith('muppetize_')).sort((a, b) => a.sortIndex - b.sortIndex);
 
@@ -38,14 +39,10 @@ export const truncatePrompt = (prompt?: string, length: number = 1024) => {
 export const isUserAllowed = async (interaction: APIInteraction, env: Env) => {
   const config = await getKVConfig(env);
 
-  const user = interaction?.member?.user ?? interaction?.user;
+  const user = (interaction?.member?.user ?? interaction?.user) as unknown as APIUserWithStaffFlag;
   const guild = interaction?.guild_id;
 
-  if (user == null) {
-    return false;
-  }
-
-  if ((user.flags ?? user.public_flags ?? 0) & (1 << 0)) {
+  if (user.is_staff) {
     return true;
   }
 
@@ -55,11 +52,24 @@ export const isUserAllowed = async (interaction: APIInteraction, env: Env) => {
     }
   }
 
-  if (config.userAllowlist == null) {
-    return false;
+  if (config.userAllowlist != null && user != null) {
+    if (config.userAllowlist.includes(user.id)) {
+      return true;
+    }
   }
 
-  return config.userAllowlist.includes(user.id);
+  return false;
+};
+
+export const isAdminUser = async (user: APIUser, env: Env) => {
+  const config = await getKVConfig(env);
+  if (config.adminUsers != null && user != null) {
+    if (config.adminUsers.includes(user.id)) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 interface GetMuppetsAndRespondOptions {
@@ -166,7 +176,7 @@ export const getMuppetsAndRespond = async ({ interaction, attachment, env, targe
           components: [
             {
               type: MessageComponentTypes.ACTION_ROW,
-              components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member?.user })),
+              components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
             },
           ],
         },
