@@ -98,9 +98,7 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
       return notFoundResponse();
     }
 
-    const user = message?.member?.user ?? message?.user;
-
-    if (user == null || !isUserAllowed(user, env)) {
+    if (!isUserAllowed(message, env)) {
       return new JsonResponse({
         type: InteractionResponseType.ChannelMessageWithSource,
         data: { content: 'You are not allowed to use this command.', flags: MessageFlags.Ephemeral },

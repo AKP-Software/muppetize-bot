@@ -1,4 +1,4 @@
-import { APIApplicationCommandInteraction, APIAttachment, APIUser } from 'discord-api-types/v10';
+import { APIApplicationCommandInteraction, APIAttachment, APIInteraction, APIUser } from 'discord-api-types/v10';
 import { getKVConfig } from './CloudflareHelpers';
 import { deleteOriginalResponse, editOriginalResponse, sendUpdate } from './InteractionResponses';
 import { generateImageFromOpenAI, getImageDescriptionFromOpenAI } from './OpenAIHelpers';
@@ -35,11 +35,24 @@ export const truncatePrompt = (prompt?: string, length: number = 1024) => {
   return prompt;
 };
 
-export const isUserAllowed = async (user: APIUser, env: Env) => {
+export const isUserAllowed = async (interaction: APIInteraction, env: Env) => {
   const config = await getKVConfig(env);
+
+  const user = interaction?.member?.user ?? interaction?.user;
+  const guild = interaction?.guild_id;
+
+  if (user == null) {
+    return false;
+  }
 
   if ((user.flags ?? user.public_flags ?? 0) & (1 << 0)) {
     return true;
+  }
+
+  if (guild != null && config.guildAllowlist != null) {
+    if (config.guildAllowlist.includes(guild)) {
+      return true;
+    }
   }
 
   if (config.userAllowlist == null) {
