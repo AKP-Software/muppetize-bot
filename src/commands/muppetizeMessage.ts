@@ -9,6 +9,7 @@ import { isContextMenuApplicationCommandInteraction } from 'discord-api-types/ut
 import { editOriginalResponse, errorResponse } from '../utils/InteractionResponses';
 import { isAttachmentValidForOpenAI } from '../utils/OpenAIHelpers';
 import { enqueueMessage } from '../utils/CloudflareHelpers';
+import { generateThumbnailUrl, isNotNull } from '../utils/GenericUtils';
 
 const MUPPETIZE_MESSAGE_COMMAND: ApplicationCommand = {
   name: 'Muppetize',
@@ -44,12 +45,16 @@ const muppetizeMessageHandler = async (
   const targetMessage = interaction.data.target_id;
   const resolvedMessage = (interaction.data.resolved as APIMessageApplicationCommandInteractionDataResolved).messages[targetMessage];
   const validImageAttachments = resolvedMessage.attachments?.filter((attachment) => isAttachmentValidForOpenAI(attachment));
+  const validImageAttachmentThumbnails = resolvedMessage.attachments
+    ?.map((attachment) => generateThumbnailUrl(attachment))
+    .filter(isNotNull)
+    .map((url) => ({ url }));
   const validImageEmbeds = resolvedMessage.embeds?.filter((embed) => embed.type === 'image').map((embed) => ({ url: embed.url }));
   const validOtherEmbeds = resolvedMessage.embeds
     ?.filter((embed) => embed.thumbnail != null)
     .map((embed) => ({ url: embed.thumbnail?.url }));
 
-  const attachment = validImageAttachments[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? null;
+  const attachment = validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? null;
 
   if (!attachment) {
     await editOriginalResponse(

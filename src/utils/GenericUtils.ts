@@ -20,6 +20,14 @@ export const downloadImage = async (url: string) => {
   return res.blob();
 };
 
+export const generateThumbnailUrl = (attachment: APIAttachment) => {
+  if (attachment.width == null || attachment.height == null) {
+    return null;
+  }
+
+  return `${attachment.proxy_url}format=webp`;
+};
+
 export const isNotNull = <T>(value: T | null): value is T => value != null;
 export const filterResolvedPromises = <T>(resolved: PromiseSettledResult<T>[]): (T | null)[] =>
   resolved.map((res) => (res.status === 'fulfilled' ? res.value : null));
