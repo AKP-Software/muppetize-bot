@@ -1,4 +1,12 @@
-import { APIApplicationCommandInteraction, APIAttachment, APIInteraction, APIUser } from 'discord-api-types/v10';
+import {
+  APIApplicationCommandInteraction,
+  APIAttachment,
+  APIInteraction,
+  APIStickerItem,
+  APIUser,
+  MessageFlags,
+  StickerFormatType,
+} from 'discord-api-types/v10';
 import { getKVConfig } from './CloudflareHelpers';
 import { deleteOriginalResponse, editOriginalResponse, sendUpdate } from './InteractionResponses';
 import { generateImageFromOpenAI, getImageDescriptionFromOpenAI } from './OpenAIHelpers';
@@ -26,6 +34,18 @@ export const generateThumbnailUrl = (attachment: APIAttachment) => {
   }
 
   return `${attachment.proxy_url}format=webp`;
+};
+
+export const validateStickerAndGetUrl = (sticker: APIStickerItem) => {
+  if (sticker.format_type === StickerFormatType.Lottie) {
+    return null;
+  }
+
+  if (sticker.format_type === StickerFormatType.GIF) {
+    return `https://cdn.discordapp.com/stickers/${sticker.id}.gif`;
+  }
+
+  return `https://cdn.discordapp.com/stickers/${sticker.id}.png`;
 };
 
 export const isNotNull = <T>(value: T | null): value is T => value != null;
@@ -86,10 +106,19 @@ interface GetMuppetsAndRespondOptions {
   env: Env;
   target_id?: string;
   sendToDM?: boolean;
+  sendSilently?: boolean;
   user_id?: string;
 }
 
-export const getMuppetsAndRespond = async ({ interaction, attachment, env, target_id, sendToDM, user_id }: GetMuppetsAndRespondOptions) => {
+export const getMuppetsAndRespond = async ({
+  interaction,
+  attachment,
+  env,
+  target_id,
+  sendToDM,
+  sendSilently,
+  user_id,
+}: GetMuppetsAndRespondOptions) => {
   let generating = true;
   let uploading = false;
   let seconds = 0;
@@ -163,6 +192,7 @@ export const getMuppetsAndRespond = async ({ interaction, attachment, env, targe
     }
 
     const imageBlobs = await Promise.all(images.map((image) => downloadImage(image.url as string)));
+    const flags = sendSilently ? MessageFlags.SuppressNotifications : undefined;
 
     if (sendToDM) {
       await sendToDMWithAttachments(
@@ -170,6 +200,7 @@ export const getMuppetsAndRespond = async ({ interaction, attachment, env, targe
         {
           attachments,
           content,
+          flags,
         },
         env,
         imageBlobs
@@ -180,6 +211,7 @@ export const getMuppetsAndRespond = async ({ interaction, attachment, env, targe
         {
           attachments,
           content,
+          flags,
           message_reference: { message_id: target_id },
           components: [
             {

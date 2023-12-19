@@ -26,6 +26,14 @@ const MUPPETIZE_USER_DM_COMMAND: ApplicationCommand = {
   integration_types: [0, 1],
 } as ApplicationCommand; // jank lol
 
+const MUPPETIZE_USER_SILENT_COMMAND: ApplicationCommand = {
+  name: 'Muppetize Silently',
+  type: ApplicationCommandType.User,
+  default_member_permissions: '2048',
+  contexts: [0, 1, 2],
+  integration_types: [0, 1],
+} as ApplicationCommand; // jank lol
+
 const muppetizeUserHandler = async (
   interaction: APIApplicationCommandInteraction,
   env: Env,
@@ -36,9 +44,14 @@ const muppetizeUserHandler = async (
   }
 
   let sendToDM = false;
+  let sendSilently = false;
 
   if (interaction.data.name === 'Muppetize to DM') {
     sendToDM = true;
+  }
+
+  if (interaction.data.name === 'Muppetize Silently') {
+    sendSilently = true;
   }
 
   const targetUser = interaction.data.target_id;
@@ -70,7 +83,7 @@ const muppetizeUserHandler = async (
     env
   );
 
-  await enqueueMessage({ interaction, attachment: { url: avatarUrl } as APIAttachment, user_id: targetUser, sendToDM }, env);
+  await enqueueMessage({ interaction, attachment: { url: avatarUrl } as APIAttachment, user_id: targetUser, sendToDM, sendSilently }, env);
 };
 
 export default [
@@ -80,6 +93,10 @@ export default [
   },
   {
     definition: MUPPETIZE_USER_DM_COMMAND,
+    handler: muppetizeUserHandler,
+  },
+  {
+    definition: MUPPETIZE_USER_SILENT_COMMAND,
     handler: muppetizeUserHandler,
   },
 ];

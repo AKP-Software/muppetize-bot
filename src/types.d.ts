@@ -12,6 +12,7 @@ declare global {
     attachment: APIAttachment;
     target_id?: string;
     sendToDM?: boolean;
+    sendSilently?: boolean;
     user_id?: string;
   }
 }

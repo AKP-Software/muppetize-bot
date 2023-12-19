@@ -9,7 +9,7 @@ import { isContextMenuApplicationCommandInteraction } from 'discord-api-types/ut
 import { editOriginalResponse, errorResponse } from '../utils/InteractionResponses';
 import { isAttachmentValidForOpenAI } from '../utils/OpenAIHelpers';
 import { enqueueMessage } from '../utils/CloudflareHelpers';
-import { generateThumbnailUrl, isNotNull } from '../utils/GenericUtils';
+import { generateThumbnailUrl, isNotNull, validateStickerAndGetUrl } from '../utils/GenericUtils';
 
 const MUPPETIZE_MESSAGE_COMMAND: ApplicationCommand = {
   name: 'Muppetize',
@@ -27,6 +27,14 @@ const MUPPETIZE_MESSAGE_DM_COMMAND: ApplicationCommand = {
   integration_types: [0, 1],
 } as ApplicationCommand; // jank lol
 
+const MUPPETIZE_MESSAGE_SILENT_COMMAND: ApplicationCommand = {
+  name: 'Muppetize Silently',
+  type: ApplicationCommandType.Message,
+  default_member_permissions: '2048',
+  contexts: [0, 1, 2],
+  integration_types: [0, 1],
+} as ApplicationCommand; // jank lol
+
 const muppetizeMessageHandler = async (
   interaction: APIApplicationCommandInteraction,
   env: Env,
@@ -37,9 +45,14 @@ const muppetizeMessageHandler = async (
   }
 
   let sendToDM = false;
+  let sendSilently = false;
 
   if (interaction.data.name === 'Muppetize to DM') {
     sendToDM = true;
+  }
+
+  if (interaction.data.name === 'Muppetize Silently') {
+    sendSilently = true;
   }
 
   const targetMessage = interaction.data.target_id;
@@ -53,8 +66,14 @@ const muppetizeMessageHandler = async (
   const validOtherEmbeds = resolvedMessage.embeds
     ?.filter((embed) => embed.thumbnail != null)
     .map((embed) => ({ url: embed.thumbnail?.url }));
+  const validStickers =
+    resolvedMessage.sticker_items
+      ?.map(validateStickerAndGetUrl)
+      .filter(isNotNull)
+      .map((url) => ({ url })) ?? [];
 
-  const attachment = validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? null;
+  const attachment =
+    validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? validStickers[0] ?? null;
 
   if (!attachment) {
     await editOriginalResponse(
@@ -76,7 +95,7 @@ const muppetizeMessageHandler = async (
     env
   );
 
-  await enqueueMessage({ interaction, attachment, target_id: targetMessage, sendToDM }, env);
+  await enqueueMessage({ interaction, attachment, target_id: targetMessage, sendToDM, sendSilently }, env);
 };
 
 export default [
@@ -86,6 +105,10 @@ export default [
   },
   {
     definition: MUPPETIZE_MESSAGE_DM_COMMAND,
+    handler: muppetizeMessageHandler,
+  },
+  {
+    definition: MUPPETIZE_MESSAGE_SILENT_COMMAND,
     handler: muppetizeMessageHandler,
   },
 ];

@@ -1,7 +1,7 @@
 import { APIApplicationCommandInteraction, ApplicationCommandOptionType } from 'discord-api-types/v10';
 import { APIInteractionResponse, APIAttachment, ApplicationCommandType } from 'discord-api-types/payloads/v10';
 import { ApplicationCommand } from '../types';
-import { resolveOption } from '../utils/InteractionOptions';
+import { getOptionValue, resolveOption } from '../utils/InteractionOptions';
 import { isAttachmentValidForOpenAI } from '../utils/OpenAIHelpers';
 import { editOriginalResponse } from '../utils/InteractionResponses';
 import { enqueueMessage } from '../utils/CloudflareHelpers';
@@ -20,6 +20,16 @@ const MUPPETIZE_COMMAND: ApplicationCommand = {
       description: 'image to muppetize',
       required: true,
     },
+    {
+      name: 'dm',
+      type: ApplicationCommandOptionType.Boolean,
+      description: 'whether to send the result via DM',
+    },
+    {
+      name: 'silent',
+      type: ApplicationCommandOptionType.Boolean,
+      description: 'whether to send the result silently',
+    },
   ],
 } as ApplicationCommand; // jank lol
 
@@ -29,6 +39,8 @@ const muppetizeHandler = async (
   _ctx: ExecutionContext
 ): Promise<APIInteractionResponse | void> => {
   const attachment = resolveOption(interaction, 'image') as APIAttachment;
+  const dm = getOptionValue(interaction, 'dm') as boolean;
+  const silent = getOptionValue(interaction, 'silent') as boolean;
 
   if (!isAttachmentValidForOpenAI(attachment)) {
     await editOriginalResponse(
@@ -50,7 +62,7 @@ const muppetizeHandler = async (
     env
   );
 
-  await enqueueMessage({ interaction, attachment }, env);
+  await enqueueMessage({ interaction, attachment, sendToDM: dm, sendSilently: silent }, env);
 };
 
 export default {
