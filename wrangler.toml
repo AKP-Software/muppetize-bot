@@ -9,6 +9,7 @@ logpush = true
 queues.producers = [{ queue = "muppetize-queue-prod", binding = "MUPPETIZE_QUEUE" }]
 queues.consumers = [{ queue = "muppetize-queue-prod", max_batch_size = 1, max_batch_timeout = 1, max_retries = 3, dead_letter_queue = "muppetize-queue-prod-dlq", max_concurrency = 20 }]
 kv_namespaces = [{ binding = "CONFIG", id = "0185ad75a7724de498433f8bc12d64f2", preview_id = "e9e28754d5fc468284bb49b6f85616d3" }]
+tail_consumers = [{service = "muppetize-bot-tail"}]
 
 [vars]
 APPLICATION_ID = "1183948520382804089"
@@ -25,3 +26,4 @@ logpush = true
 queues.producers = [{ queue = "muppetize-queue-prod", binding = "MUPPETIZE_QUEUE" }]
 queues.consumers = [{ queue = "muppetize-queue-prod", max_batch_size = 1, max_batch_timeout = 1, max_retries = 3, dead_letter_queue = "muppetize-queue-prod-dlq", max_concurrency = 20 }]
 kv_namespaces = [{ binding = "CONFIG", id = "0185ad75a7724de498433f8bc12d64f2", preview_id = "e9e28754d5fc468284bb49b6f85616d3" }]
+tail_consumers = [{service = "muppetize-bot-tail"}]
