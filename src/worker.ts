@@ -167,7 +167,7 @@ export default {
       const body = await request.clone().arrayBuffer();
       const isValidRequest = verifyKey(body, signature, timestamp, env.PUBLIC_KEY);
       if (!isValidRequest) {
-        console.error('Invalid Request');
+        console.error('Invalid Request', request);
         return new Response('Bad request signature.', { status: 401 });
       }
     }
