@@ -61,6 +61,7 @@ const muppetizeUserHandler = async (
   const avatarHash = resolvedMember?.avatar ?? resolvedUser.avatar;
 
   if (avatarHash == null) {
+    console.log('User has no avatar: ', targetUser);
     await editOriginalResponse(
       interaction,
       {

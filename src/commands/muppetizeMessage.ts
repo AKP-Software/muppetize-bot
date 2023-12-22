@@ -76,6 +76,7 @@ const muppetizeMessageHandler = async (
     validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? validStickers[0] ?? null;
 
   if (!attachment) {
+    console.log('No valid attachment found');
     await editOriginalResponse(
       interaction,
       {

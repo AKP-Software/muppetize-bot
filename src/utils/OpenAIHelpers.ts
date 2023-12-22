@@ -4,6 +4,7 @@ import { getKVConfig } from './CloudflareHelpers';
 
 export const isAttachmentValidForOpenAI = (attachment: APIAttachment) => {
   if (!attachment.content_type?.startsWith('image/')) {
+    console.log('Invalid content type: ', attachment.content_type);
     return false;
   }
 
@@ -11,10 +12,12 @@ export const isAttachmentValidForOpenAI = (attachment: APIAttachment) => {
   const safeFileTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
   if (!safeFileTypes.includes(fileType ?? '')) {
+    console.log('Invalid file type');
     return false;
   }
 
   if (attachment.size > 20 * 1024 * 1024) {
+    console.log('File too large');
     return false;
   }
 

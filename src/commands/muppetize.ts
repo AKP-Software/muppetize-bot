@@ -38,11 +38,15 @@ const muppetizeHandler = async (
   env: Env,
   _ctx: ExecutionContext
 ): Promise<APIInteractionResponse | void> => {
+  console.log('Muppetize command received');
   const attachment = resolveOption(interaction, 'image') as APIAttachment;
   const dm = getOptionValue(interaction, 'dm') as boolean;
   const silent = getOptionValue(interaction, 'silent') as boolean;
+  console.log('Muppetize command options: ', { attachment, dm, silent });
 
   if (!isAttachmentValidForOpenAI(attachment)) {
+    console.log('Invalid attachment: ', attachment);
+    console.log('Muppetize command rejected');
     await editOriginalResponse(
       interaction,
       {
@@ -62,6 +66,7 @@ const muppetizeHandler = async (
     env
   );
 
+  console.log('Muppetize command accepted');
   await enqueueMessage({ interaction, attachment, sendToDM: dm, sendSilently: silent }, env);
 };
 
