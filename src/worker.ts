@@ -177,6 +177,7 @@ export default {
   async queue(batch: MessageBatch<QueueMessage>, env: Env, _ctx: ExecutionContext): Promise<void> {
     console.log(`Processing batch of ${batch.messages.length} messages`);
     for (const message of batch.messages) {
+      console.log('Received message:', { ...message.body, interaction: { ...message.body.interaction, token: '<REDACTED>' } });
       try {
         await getMuppetsAndRespond({ ...message.body, env });
         message.ack();

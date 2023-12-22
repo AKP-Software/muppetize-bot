@@ -122,6 +122,7 @@ export const getMuppetsAndRespond = async ({
   let generating = true;
   let uploading = false;
   let seconds = 0;
+  console.log('Generating muppets');
 
   const updateInterval = setInterval(async () => {
     if (generating) {
@@ -157,8 +158,10 @@ export const getMuppetsAndRespond = async ({
     ).filter(isNotNull);
     generating = false;
     uploading = true;
+    console.log(`Generated ${images.length} muppets in ${seconds} seconds`);
 
     if (images.length === 0) {
+      console.log('No images generated');
       throw new Error('No images generated');
     }
 
@@ -195,6 +198,7 @@ export const getMuppetsAndRespond = async ({
     const flags = sendSilently ? MessageFlags.SuppressNotifications : undefined;
 
     if (sendToDM) {
+      console.log('Sending to DM');
       await sendToDMWithAttachments(
         interaction,
         {
@@ -206,6 +210,7 @@ export const getMuppetsAndRespond = async ({
         imageBlobs
       );
     } else {
+      console.log('Responding to original');
       await respondToOriginalWithAttachments(
         interaction,
         {
@@ -227,8 +232,10 @@ export const getMuppetsAndRespond = async ({
 
     uploading = false;
 
+    console.log('Deleting original response');
     await deleteOriginalResponse(interaction, env);
-  } catch {
+  } catch (e) {
+    console.error('Error generating muppets', e);
     await editOriginalResponse(
       interaction,
       {

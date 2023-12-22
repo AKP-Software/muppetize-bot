@@ -1,10 +1,7 @@
 export const enqueueMessage = async (message: QueueMessage, env: Env) => {
   const loggableMessage = {
     ...message,
-    interaction: {
-      ...message.interaction,
-      token: '<REDACTED>',
-    },
+    interaction: message.interaction.id,
   };
   console.log('Enqueuing message: ', loggableMessage);
 
