@@ -1,9 +1,5 @@
 export const enqueueMessage = async (message: QueueMessage, env: Env) => {
-  const loggableMessage = {
-    ...message,
-    interaction: message.interaction.id,
-  };
-  console.log('Enqueuing message: ', loggableMessage);
+  env.logger.log('Enqueuing message');
 
   // @ts-ignore - types don't match docs for some reason
   return env.MUPPETIZE_QUEUE.send(message, { contentType: 'json' });

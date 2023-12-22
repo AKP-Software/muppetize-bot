@@ -1,2 +1,3 @@
 DISCORD_SECRET={your Discord bot token}
 OPENAI_SECRET={your OpenAI API key}
+DATADOG_SECRET{your Datadog API key}

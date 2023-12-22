@@ -9,6 +9,7 @@ import { DiscordRequest } from './DiscordRequest';
 
 export const sendUpdate = async (interaction: APIApplicationCommandInteraction, env: Env, secondsGenerating: number, message: string) => {
   const ellipsis = ['.', '..', '...'][secondsGenerating % 3];
+  env.logger.log('Sending update');
   await editOriginalResponse(
     interaction,
     {
@@ -28,6 +29,7 @@ export const errorResponse: APIInteractionResponse = {
 
 export const deleteOriginalResponse = async (interaction: APIInteraction, env: Env) => {
   try {
+    env.logger.log('Deleting original response');
     await DiscordRequest({
       endpoint: `/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
       options: {
@@ -35,13 +37,15 @@ export const deleteOriginalResponse = async (interaction: APIInteraction, env: E
       },
       env,
     });
+    env.logger.log('Deleted original response');
   } catch {
-    // ignore, probably expired interaction token
+    env.logger.log('Error deleting original response');
   }
 };
 
 export const deleteFollowUp = async (interaction: APIInteraction, env: Env) => {
   try {
+    env.logger.log('Deleting followup');
     await DiscordRequest({
       endpoint: `/webhooks/${interaction.application_id}/${interaction.token}/messages/${interaction.message!.id}`,
       options: {
@@ -49,13 +53,15 @@ export const deleteFollowUp = async (interaction: APIInteraction, env: Env) => {
       },
       env,
     });
+    env.logger.log('Deleted followup');
   } catch {
-    // ignore, probably expired interaction token
+    env.logger.log('Error deleting followup');
   }
 };
 
 export const editOriginalResponse = async (interaction: APIInteraction, body: unknown, env: Env) => {
   try {
+    env.logger.log('Editing original response');
     await DiscordRequest({
       endpoint: `/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
       options: {
@@ -64,12 +70,14 @@ export const editOriginalResponse = async (interaction: APIInteraction, body: un
       jsonBody: body,
       env,
     });
+    env.logger.log('Edited original response');
   } catch {
-    // ignore, probably expired interaction token
+    env.logger.log('Error editing original response');
   }
 };
 
 export const sendMessageToChannel = async (channelId: string, body: unknown, env: Env) => {
+  env.logger.log('Sending message to channel');
   await DiscordRequest({
     endpoint: `/channels/${channelId}/messages`,
     options: {
@@ -78,4 +86,5 @@ export const sendMessageToChannel = async (channelId: string, body: unknown, env
     jsonBody: body,
     env,
   });
+  env.logger.log('Sent message to channel');
 };

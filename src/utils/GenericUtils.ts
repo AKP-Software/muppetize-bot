@@ -71,21 +71,27 @@ export const isUserAllowed = async (interaction: APIInteraction, env: Env) => {
   const guild = interaction?.guild_id;
 
   if (user.is_staff) {
+    env.logger.log('User is staff');
     return true;
   }
 
   if (guild != null && config.guildAllowlist != null) {
+    env.logger.log('Checking guild allowlist');
     if (config.guildAllowlist.includes(guild)) {
+      env.logger.log('Guild is allowlisted');
       return true;
     }
   }
 
   if (config.userAllowlist != null && user != null) {
+    env.logger.log('Checking user allowlist');
     if (config.userAllowlist.includes(user.id)) {
+      env.logger.log('User is allowlisted');
       return true;
     }
   }
 
+  env.logger.log('User is not allowlisted');
   return false;
 };
 
@@ -122,7 +128,7 @@ export const getMuppetsAndRespond = async ({
   let generating = true;
   let uploading = false;
   let seconds = 0;
-  console.log('Generating muppets');
+  env.logger.log('Generating muppets');
 
   const updateInterval = setInterval(async () => {
     if (generating) {
@@ -158,11 +164,13 @@ export const getMuppetsAndRespond = async ({
     ).filter(isNotNull);
     generating = false;
     uploading = true;
-    console.log(`Generated ${images.length} muppets in ${seconds} seconds`);
+    env.logger.log(`Generated ${images.length} muppets in ${seconds} seconds`);
+    env.logger.setExtraData('imagesGenerated', images.length);
+    env.logger.setExtraData('secondsToGenerate', seconds);
     seconds = 0;
 
     if (images.length === 0) {
-      console.log('No images generated');
+      env.logger.log('No images generated');
       throw new Error('No images generated');
     }
 
@@ -199,7 +207,7 @@ export const getMuppetsAndRespond = async ({
     const flags = sendSilently ? MessageFlags.SuppressNotifications : undefined;
 
     if (sendToDM) {
-      console.log('Sending to DM');
+      env.logger.log('Sending to DM');
       await sendToDMWithAttachments(
         interaction,
         {
@@ -211,7 +219,7 @@ export const getMuppetsAndRespond = async ({
         imageBlobs
       );
     } else {
-      console.log('Responding to original');
+      env.logger.log('Responding to original');
       await respondToOriginalWithAttachments(
         interaction,
         {
@@ -232,9 +240,10 @@ export const getMuppetsAndRespond = async ({
     }
 
     uploading = false;
-    console.log(`Uploaded images in ${seconds} seconds`);
+    env.logger.log(`Uploaded images in ${seconds} seconds`);
+    env.logger.setExtraData('secondsToUpload', seconds);
 
-    console.log('Deleting original response');
+    env.logger.log('Deleting original response');
     await deleteOriginalResponse(interaction, env);
   } catch (e) {
     console.error('Error generating muppets', e);

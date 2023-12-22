@@ -21,9 +21,16 @@ declare interface Env {
   PUBLIC_KEY: string;
   TEST_GUILD_ID: string;
   DISCORD_SECRET: string;
+  DATADOG_SECRET: string;
   OPENAI_SECRET: string;
   OPENAI_ENDPOINT: string;
   GPT_VISION_PROMPT: string;
   DALL_E_PROMPT: string;
   ENVIRONMENT: 'production' | 'development';
+
+  logger: {
+    log: (message: string) => void;
+    setExtraData: (key: string, value: unknown) => void;
+    sendLogsToDatadog: (message: DatadogLogsMessage) => Promise<void>;
+  };
 }

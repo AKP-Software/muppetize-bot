@@ -40,7 +40,9 @@ const muppetizeMessageHandler = async (
   env: Env,
   _ctx: ExecutionContext
 ): Promise<APIInteractionResponse | void> => {
+  env.logger.log('Muppetize message command received');
   if (!isContextMenuApplicationCommandInteraction(interaction)) {
+    env.logger.log('Invalid interaction type');
     return errorResponse;
   }
 
@@ -48,16 +50,18 @@ const muppetizeMessageHandler = async (
   let sendSilently = false;
 
   if (interaction.data.name === 'Muppetize to DM') {
+    env.logger.log('Muppetize to DM command received');
     sendToDM = true;
   }
 
   if (interaction.data.name === 'Muppetize Silently') {
+    env.logger.log('Muppetize Silently command received');
     sendSilently = true;
   }
 
   const targetMessage = interaction.data.target_id;
   const resolvedMessage = (interaction.data.resolved as APIMessageApplicationCommandInteractionDataResolved).messages[targetMessage];
-  const validImageAttachments = resolvedMessage.attachments?.filter((attachment) => isAttachmentValidForOpenAI(attachment));
+  const validImageAttachments = resolvedMessage.attachments?.filter((attachment) => isAttachmentValidForOpenAI(attachment, env));
   const validImageAttachmentThumbnails = resolvedMessage.attachments
     ?.map((attachment) => generateThumbnailUrl(attachment))
     .filter(isNotNull)
@@ -76,7 +80,7 @@ const muppetizeMessageHandler = async (
     validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? validStickers[0] ?? null;
 
   if (!attachment) {
-    console.log('No valid attachment found');
+    env.logger.log('No valid attachment found');
     await editOriginalResponse(
       interaction,
       {
@@ -96,6 +100,7 @@ const muppetizeMessageHandler = async (
     env
   );
 
+  env.logger.log('Muppetize message command accepted');
   await enqueueMessage({ interaction, attachment, target_id: targetMessage, sendToDM, sendSilently }, env);
 };
 

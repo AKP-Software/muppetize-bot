@@ -39,7 +39,9 @@ const muppetizeUserHandler = async (
   env: Env,
   _ctx: ExecutionContext
 ): Promise<APIInteractionResponse | void> => {
+  env.logger.log('Muppetize user command received');
   if (!isContextMenuApplicationCommandInteraction(interaction)) {
+    env.logger.log('Invalid interaction type');
     return errorResponse;
   }
 
@@ -47,10 +49,12 @@ const muppetizeUserHandler = async (
   let sendSilently = false;
 
   if (interaction.data.name === 'Muppetize to DM') {
+    env.logger.log('Muppetize to DM command received');
     sendToDM = true;
   }
 
   if (interaction.data.name === 'Muppetize Silently') {
+    env.logger.log('Muppetize Silently command received');
     sendSilently = true;
   }
 
@@ -61,7 +65,8 @@ const muppetizeUserHandler = async (
   const avatarHash = resolvedMember?.avatar ?? resolvedUser.avatar;
 
   if (avatarHash == null) {
-    console.log('User has no avatar: ', targetUser);
+    env.logger.log('User has no avatar');
+    env.logger.log('Muppetize user command rejected');
     await editOriginalResponse(
       interaction,
       {
@@ -84,6 +89,7 @@ const muppetizeUserHandler = async (
     env
   );
 
+  env.logger.log('Muppetize user command accepted');
   await enqueueMessage({ interaction, attachment: { url: avatarUrl } as APIAttachment, user_id: targetUser, sendToDM, sendSilently }, env);
 };
 

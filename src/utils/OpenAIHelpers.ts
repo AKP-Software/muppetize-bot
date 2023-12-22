@@ -2,9 +2,9 @@ import { APIAttachment } from 'discord-api-types/v10';
 import OpenAI from 'openai';
 import { getKVConfig } from './CloudflareHelpers';
 
-export const isAttachmentValidForOpenAI = (attachment: APIAttachment) => {
+export const isAttachmentValidForOpenAI = (attachment: APIAttachment, env: Env) => {
   if (!attachment.content_type?.startsWith('image/')) {
-    console.log('Invalid content type: ', attachment.content_type);
+    env.logger.log('Invalid content type');
     return false;
   }
 
@@ -12,12 +12,12 @@ export const isAttachmentValidForOpenAI = (attachment: APIAttachment) => {
   const safeFileTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
 
   if (!safeFileTypes.includes(fileType ?? '')) {
-    console.log('Invalid file type');
+    env.logger.log('Invalid file type');
     return false;
   }
 
   if (attachment.size > 20 * 1024 * 1024) {
-    console.log('File too large');
+    env.logger.log('File too large');
     return false;
   }
 
@@ -56,7 +56,8 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
     max_tokens,
   });
 
-  console.log('GPT Description: ', completion.choices[0].message.content);
+  // env.logger.log('GPT Description:');
+  // env.logger.log(completion.choices[0].message.content ?? '');
 
   return completion.choices[0].message.content;
 };
@@ -81,7 +82,8 @@ export const generateImageFromOpenAI = async (description: string, env: Env, tim
     response_format: 'url',
   });
 
-  console.log('DALL-E revised prompt: ', generation.data[0].revised_prompt);
+  // env.logger.log('DALL-E revised prompt');
+  // env.logger.log(generation.data[0].revised_prompt ?? '');
 
   return generation.data[0];
 };

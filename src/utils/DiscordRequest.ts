@@ -35,7 +35,7 @@ export const DiscordRequest = async <T = unknown>({
 
   if (!res.ok) {
     const data = await res.json();
-    console.error(`call to ${endpoint} with options ${JSON.stringify(options)} resulted in status ${res.status}!`);
+    env.logger.log(`call to ${endpoint} with options ${JSON.stringify(options)} resulted in status ${res.status}!`);
     throw new Error(JSON.stringify(data));
   }
 

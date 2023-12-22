@@ -12,6 +12,7 @@ const handler = async (
   const [_, userId] = interaction.data.custom_id.toLowerCase().split(':');
 
   if (!user) {
+    env.logger.log('Invalid user');
     return errorResponse;
   }
 
