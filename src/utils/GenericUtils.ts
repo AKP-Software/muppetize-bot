@@ -159,6 +159,7 @@ export const getMuppetsAndRespond = async ({
     generating = false;
     uploading = true;
     console.log(`Generated ${images.length} muppets in ${seconds} seconds`);
+    seconds = 0;
 
     if (images.length === 0) {
       console.log('No images generated');
@@ -231,6 +232,7 @@ export const getMuppetsAndRespond = async ({
     }
 
     uploading = false;
+    console.log(`Uploaded images in ${seconds} seconds`);
 
     console.log('Deleting original response');
     await deleteOriginalResponse(interaction, env);
