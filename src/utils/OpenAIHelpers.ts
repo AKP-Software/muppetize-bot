@@ -56,6 +56,8 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
     max_tokens,
   });
 
+  console.log('GPT Description: ', completion.choices[0].message.content);
+
   return completion.choices[0].message.content;
 };
 
@@ -78,6 +80,8 @@ export const generateImageFromOpenAI = async (description: string, env: Env, tim
     style: 'vivid',
     response_format: 'url',
   });
+
+  console.log('DALL-E revised prompt: ', generation.data[0].revised_prompt);
 
   return generation.data[0];
 };
