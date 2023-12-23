@@ -9,7 +9,6 @@ import { DiscordRequest } from './DiscordRequest';
 
 export const sendUpdate = async (interaction: APIApplicationCommandInteraction, env: Env, secondsGenerating: number, message: string) => {
   const ellipsis = ['.', '..', '...'][secondsGenerating % 3];
-  env.logger.log('Sending update');
   await editOriginalResponse(
     interaction,
     {
