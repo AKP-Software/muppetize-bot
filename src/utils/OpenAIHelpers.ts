@@ -56,8 +56,7 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
     max_tokens,
   });
 
-  // env.logger.log('GPT Description:');
-  // env.logger.log(completion.choices[0].message.content ?? '');
+  env.logger.log(`GPT Description: ${completion.choices[0].message.content ?? ''}`);
 
   return completion.choices[0].message.content;
 };
@@ -82,8 +81,7 @@ export const generateImageFromOpenAI = async (description: string, env: Env, tim
     response_format: 'url',
   });
 
-  // env.logger.log('DALL-E revised prompt');
-  // env.logger.log(generation.data[0].revised_prompt ?? '');
+  env.logger.log(`DALL-E revised prompt: ${generation.data[0].revised_prompt ?? ''}`);
 
   return generation.data[0];
 };
