@@ -188,16 +188,22 @@ export const getMuppetsAndRespond = async ({
       content = `<@${member}>, your muppet(s) have arrived!`;
     }
 
+    const includeMember = member && !sendToDM;
+
     if (target_id && interaction.guild_id) {
-      content = `Generated from this message: https://discord.com/channels/${interaction.guild_id}/${interaction.channel.id}/${target_id}`;
+      content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this message: https://discord.com/channels/${
+        interaction.guild_id
+      }/${interaction.channel.id}/${target_id}`;
     }
 
     if (target_id && interaction.guild_id == null) {
-      content = `Generated from this message: https://discord.com/channels/@me/${interaction.channel.id}/${target_id}`;
+      content = `Generated  ${includeMember ? `by <@${member}> ` : ''}from this message: https://discord.com/channels/@me/${
+        interaction.channel.id
+      }/${target_id}`;
     }
 
     if (user_id) {
-      content = `Generated from this user: <@${user_id}>`;
+      content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this user: <@${user_id}>`;
       if (interaction.guild_id) {
         content += ` from <#${interaction.channel.id}>`;
       }
