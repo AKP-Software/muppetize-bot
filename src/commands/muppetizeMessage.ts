@@ -67,6 +67,7 @@ const muppetizeMessageHandler = async (
     .filter(isNotNull)
     .map((url) => ({ url }));
   const validImageEmbeds = resolvedMessage.embeds?.filter((embed) => embed.type === 'image').map((embed) => ({ url: embed.url }));
+  const validRichEmbeds = resolvedMessage.embeds?.filter((embed) => embed.image != null).map((embed) => ({ url: embed.image!.url }));
   const validOtherEmbeds = resolvedMessage.embeds
     ?.filter((embed) => embed.thumbnail != null)
     .map((embed) => ({ url: embed.thumbnail?.url }));
@@ -77,7 +78,13 @@ const muppetizeMessageHandler = async (
       .map((url) => ({ url })) ?? [];
 
   const attachment =
-    validImageAttachments[0] ?? validImageAttachmentThumbnails[0] ?? validImageEmbeds[0] ?? validOtherEmbeds[0] ?? validStickers[0] ?? null;
+    validImageAttachments[0] ??
+    validImageAttachmentThumbnails[0] ??
+    validImageEmbeds[0] ??
+    validRichEmbeds[0] ??
+    validOtherEmbeds[0] ??
+    validStickers[0] ??
+    null;
 
   if (!attachment) {
     env.logger.log('No valid attachment found');
