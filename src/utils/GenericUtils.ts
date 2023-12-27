@@ -197,7 +197,7 @@ export const getMuppetsAndRespond = async ({
     }
 
     if (target_id && interaction.guild_id == null) {
-      content = `Generated  ${includeMember ? `by <@${member}> ` : ''}from this message: https://discord.com/channels/@me/${
+      content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this message: https://discord.com/channels/@me/${
         interaction.channel.id
       }/${target_id}`;
     }
