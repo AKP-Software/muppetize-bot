@@ -24,6 +24,8 @@ declare interface Env {
   DATADOG_SECRET: string;
   OPENAI_SECRET: string;
   OPENAI_ENDPOINT: string;
+  OPENAI_VISION_MODEL: string;
+  OPENAI_DALLE_MODEL: string;
   GPT_VISION_PROMPT: string;
   DALL_E_PROMPT: string;
   ENVIRONMENT: 'production' | 'development';

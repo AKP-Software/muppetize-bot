@@ -35,7 +35,7 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
   });
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4-vision-preview',
+    model: config.openAiVisionModel,
     messages: [
       {
         role: 'user',
@@ -72,7 +72,7 @@ export const generateImageFromOpenAI = async (description: string, env: Env, tim
   });
 
   const generation = await openai.images.generate({
-    model: 'dall-e-3',
+    model: config.openAiDalleModel,
     prompt: `${config.dallePrompt} ${description}`,
     n: 1,
     size: '1024x1024',
