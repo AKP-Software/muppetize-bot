@@ -116,11 +116,6 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
       return notFoundResponse(request, env, ctx);
     }
 
-    return new JsonResponse({
-      type: InteractionResponseType.ChannelMessageWithSource,
-      data: { content: 'Sorry, Muppetize was part of the 17%, and was lost as of <t:1705003200:D>. 💔', flags: MessageFlags.Ephemeral },
-    });
-
     const userAllowed = await isUserAllowed(message, env);
 
     if (!userAllowed) {
