@@ -24,7 +24,7 @@ export const isAttachmentValidForOpenAI = (attachment: APIAttachment, env: Env) 
   return true;
 };
 
-export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_tokens: number = 500) => {
+export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_tokens: number = 500, typeOverride: string = 'a Muppet') => {
   const config = await getKVConfig(env);
 
   const openai = new OpenAI({
@@ -42,7 +42,7 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
         content: [
           {
             type: 'text',
-            text: config.gptPrompt,
+            text: config.gptPrompt.replace('<type>', typeOverride),
           },
           {
             type: 'image_url',
@@ -61,7 +61,12 @@ export const getImageDescriptionFromOpenAI = async (url: string, env: Env, max_t
   return completion.choices[0].message.content;
 };
 
-export const generateImageFromOpenAI = async (description: string, env: Env, timeout: number = 45000) => {
+export const generateImageFromOpenAI = async (
+  description: string,
+  env: Env,
+  timeout: number = 45000,
+  typeOverride: string = 'a Muppet'
+) => {
   const config = await getKVConfig(env);
 
   const openai = new OpenAI({
@@ -73,7 +78,7 @@ export const generateImageFromOpenAI = async (description: string, env: Env, tim
 
   const generation = await openai.images.generate({
     model: config.openAiDalleModel,
-    prompt: `${config.dallePrompt} ${description}`,
+    prompt: `${config.dallePrompt.replace('<type>', typeOverride)} ${description}`,
     n: 1,
     size: '1024x1024',
     quality: 'hd',

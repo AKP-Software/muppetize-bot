@@ -30,6 +30,11 @@ const MUPPETIZE_COMMAND: ApplicationCommand = {
       type: ApplicationCommandOptionType.Boolean,
       description: 'whether to send the result silently',
     },
+    {
+      name: 'type',
+      type: ApplicationCommandOptionType.String,
+      description: 'what to generate from your image. default: a Muppet',
+    },
   ],
 } as ApplicationCommand; // jank lol
 
@@ -42,6 +47,7 @@ const muppetizeHandler = async (
   const attachment = resolveOption(interaction, 'image') as APIAttachment;
   const dm = getOptionValue(interaction, 'dm') as boolean;
   const silent = getOptionValue(interaction, 'silent') as boolean;
+  const type = getOptionValue(interaction, 'type') as string;
   env.logger.log('Muppetize command options:');
   env.logger.log(JSON.stringify({ attachment, dm, silent }));
 
@@ -68,7 +74,7 @@ const muppetizeHandler = async (
   );
 
   env.logger.log('Muppetize command accepted');
-  await enqueueMessage({ interaction, attachment, sendToDM: dm, sendSilently: silent }, env);
+  await enqueueMessage({ interaction, attachment, sendToDM: dm, sendSilently: silent, typeOverride: type }, env);
 };
 
 export default {

@@ -113,6 +113,7 @@ interface GetMuppetsAndRespondOptions {
   target_id?: string;
   sendToDM?: boolean;
   sendSilently?: boolean;
+  typeOverride?: string;
   user_id?: string;
 }
 
@@ -123,6 +124,7 @@ export const getMuppetsAndRespond = async ({
   target_id,
   sendToDM,
   sendSilently,
+  typeOverride,
   user_id,
 }: GetMuppetsAndRespondOptions) => {
   let generating = true;
@@ -130,13 +132,20 @@ export const getMuppetsAndRespond = async ({
   let seconds = 0;
   env.logger.log('Generating muppets');
 
+  const muppet = typeOverride ? 'image' : 'muppet';
+
   const updateInterval = setInterval(async () => {
     if (generating) {
       if (seconds > 25) {
-        await sendUpdate(interaction, env, seconds, 'Generating muppets is taking a while');
+        await sendUpdate(interaction, env, seconds, `Generating ${muppet}s is taking a while`);
       } else {
         const time = 25 - seconds;
-        await sendUpdate(interaction, env, seconds, `Generating muppets. Estimated time remaining: ${time} second${time === 1 ? '' : 's'}`);
+        await sendUpdate(
+          interaction,
+          env,
+          seconds,
+          `Generating ${muppet}s. Estimated time remaining: ${time} second${time === 1 ? '' : 's'}`
+        );
       }
       seconds += 1;
       return;
@@ -155,12 +164,14 @@ export const getMuppetsAndRespond = async ({
   try {
     const descriptions = filterResolvedPromises(
       await Promise.allSettled([
-        getImageDescriptionFromOpenAI(attachment.url, env, 500),
-        getImageDescriptionFromOpenAI(attachment.url, env, 501),
+        getImageDescriptionFromOpenAI(attachment.url, env, 500, typeOverride),
+        getImageDescriptionFromOpenAI(attachment.url, env, 501, typeOverride),
       ])
     ).filter(isNotNull);
     const images = filterResolvedPromises(
-      await Promise.allSettled(descriptions.map((desc) => generateImageFromOpenAI(desc as string, env)))
+      await Promise.allSettled(
+        descriptions.map((desc) => generateImageFromOpenAI(desc as string, env, undefined /* timeout */, typeOverride))
+      )
     ).filter(isNotNull);
     generating = false;
     uploading = true;
@@ -185,7 +196,7 @@ export const getMuppetsAndRespond = async ({
     let content = '';
 
     if (member) {
-      content = `<@${member}>, your muppet(s) have arrived!`;
+      content = `<@${member}>, your ${muppet}(s) have arrived!`;
     }
 
     const includeMember = member && !sendToDM;

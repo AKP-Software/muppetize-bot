@@ -13,6 +13,7 @@ declare global {
     target_id?: string;
     sendToDM?: boolean;
     sendSilently?: boolean;
+    typeOverride?: string;
     user_id?: string;
   }
 }

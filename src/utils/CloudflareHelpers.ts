@@ -10,8 +10,8 @@ export const getKVConfig = async (env: Env) => {
   const dallePrompt = (await env.CONFIG.get('DALL_E_PROMPT', 'text')) ?? '';
   const gptPrompt = (await env.CONFIG.get('GPT_PROMPT', 'text')) ?? '';
   const openAiEndpoint = await env.CONFIG.get('OPENAI_ENDPOINT', 'text');
-  const openAiVisionModel = await env.CONFIG.get('OPENAI_VISION_MODEL', 'text');
-  const openAiDalleModel = await env.CONFIG.get('OPENAI_DALLE_MODEL', 'text');
+  const openAiVisionModel = (await env.CONFIG.get('OPENAI_VISION_MODEL', 'text')) ?? 'gpt-4o';
+  const openAiDalleModel = (await env.CONFIG.get('OPENAI_DALLE_MODEL', 'text')) ?? 'dall-e-3';
   const userAllowlist = (await env.CONFIG.get('USER_ALLOWLIST', 'json')) as string[] | null;
   const guildAllowlist = (await env.CONFIG.get('GUILD_ALLOWLIST', 'json')) as string[] | null;
 
