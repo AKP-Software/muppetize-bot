@@ -55,16 +55,16 @@ export const respondToOriginalWithAttachments = async (interaction: APIInteracti
 };
 
 export const sendToDMWithAttachments = async (interaction: APIInteraction, body: unknown, env: Env, imageBlobs: BlobLike[]) => {
-  const channelRequest = (await DiscordRequest<APIDMChannel>({
-    endpoint: `/users/@me/channels`,
-    options: {
-      method: 'POST',
+  const channelRequest = (await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bot ${env.DISCORD_SECRET}`,
+      'Content-Type': 'application/json',
     },
-    jsonBody: {
+    body: JSON.stringify({
       recipient_id: interaction.user?.id ?? interaction.member?.user?.id,
-    },
-    env,
-  })) as APIDMChannel;
+    }),
+  }).then((res) => res.json())) as APIDMChannel;
 
   const channelId = channelRequest.id;
 
@@ -89,6 +89,7 @@ export const sendToDMWithAttachments = async (interaction: APIInteraction, body:
   if (json.errors) {
     env.logger.setSeverity('error');
     env.logger.setExtraData('discordResponse', json);
+    env.logger.log('Error sending to DM with attachments');
     throw new Error('Error sending to DM with attachments');
   }
 };

@@ -268,6 +268,7 @@ export const getMuppetsAndRespond = async ({
 
     return { interaction, image: attachment, attachments, imageBlobs };
   } catch (e) {
+    clearInterval(updateInterval);
     console.error('Error generating muppets', e);
     env.logger.setSeverity('error');
     await editOriginalResponse(
@@ -278,6 +279,8 @@ export const getMuppetsAndRespond = async ({
       env
     );
   }
+
+  return { interaction, image: attachment, attachments: [], imageBlobs: [] };
 };
 
 export const shouldBeEphemeral = (interaction: APIApplicationCommandInteraction) => {

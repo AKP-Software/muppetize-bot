@@ -43,6 +43,7 @@ export const DiscordRequest = async <T = unknown>({
     env.logger.setSeverity('error');
     env.logger.setExtraData('endpoint', endpoint);
     env.logger.setExtraData('discordResponse', data);
+    env.logger.log('Error in DiscordRequest');
     throw new Error('Error in DiscordRequest');
   }
 

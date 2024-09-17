@@ -202,7 +202,10 @@ export default {
       await getMuppetsAndRespond({ ...message.body, env })
         .then(async (data) => {
           message.ack();
-          if (data == null) return;
+          if (data == null) {
+            env.logger.log('No data to log to Discord');
+            return;
+          }
 
           // @ts-ignore - types technically mismatch here but it still works.
           await DiscordLogger.log({ env, ...data });
