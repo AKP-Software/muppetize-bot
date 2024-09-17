@@ -32,11 +32,18 @@ export const DiscordRequest = async <T = unknown>({
   };
 
   const res = await fetch(`${baseUrl}${endpoint}`, reqOptions);
+  const data: any = await res.json();
 
   if (!res.ok) {
-    const data = await res.json();
     env.logger.log(`call to ${endpoint} with options ${JSON.stringify(options)} resulted in status ${res.status}!`);
     throw new Error(JSON.stringify(data));
+  }
+
+  if (data.errors) {
+    env.logger.setSeverity('error');
+    env.logger.setExtraData('endpoint', endpoint);
+    env.logger.setExtraData('discordResponse', data);
+    throw new Error('Error in DiscordRequest');
   }
 
   if (res.status === 204) {

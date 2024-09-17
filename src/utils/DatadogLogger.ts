@@ -13,6 +13,7 @@ interface DatadogLogsData {
   ddtags: string;
   hostname: string;
   message: {
+    severity: string;
     timestamp: number;
     logs: Message[];
     interaction?: APIInteraction;
@@ -37,6 +38,7 @@ interface Message {
 class Logger {
   private logs: Message[] = [];
   private extraData: Record<string, unknown> = {};
+  private severity: string = 'info';
 
   public log(message: string) {
     console.log(message);
@@ -45,6 +47,10 @@ class Logger {
 
   public setExtraData(key: string, value: unknown) {
     this.extraData[key] = value;
+  }
+
+  public setSeverity(severity: string) {
+    this.severity = severity;
   }
 
   public async sendLogsToDatadog({ request, response, interaction, env, queueParameters }: DatadogLogsMessage) {
@@ -60,6 +66,7 @@ class Logger {
       ddtags: `service:cloudflare,source:cloudflare,worker:muppetize-bot,application_id:${env.APPLICATION_ID}`,
       hostname,
       message: {
+        severity: this.severity,
         timestamp: Date.now(),
         logs: this.logs,
         interaction: Object.assign({}, interaction),

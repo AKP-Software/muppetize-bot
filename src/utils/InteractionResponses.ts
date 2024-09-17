@@ -71,24 +71,31 @@ export const editOriginalResponse = async (interaction: APIInteraction, body: un
 };
 
 export const editOriginalResponseWithAttachments = async (interaction: APIInteraction, body: unknown, env: Env, imageBlobs: BlobLike[]) => {
-  try {
-    const formData = new FormData();
-    formData.append('payload_json', JSON.stringify(body));
+  const formData = new FormData();
+  formData.append('payload_json', JSON.stringify(body));
 
-    imageBlobs.forEach((blob, index) => {
-      // @ts-ignore - types technically mismatch here but it still works.
-      formData.append(`files[${index}]`, blob, 'muppet.png');
-    });
+  imageBlobs.forEach((blob, index) => {
+    // @ts-ignore - types technically mismatch here but it still works.
+    formData.append(`files[${index}]`, blob, 'muppet.png');
+  });
 
-    await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+  const response = await fetch(
+    `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
+    {
       method: 'PATCH',
       headers: {
         Authorization: `Bot ${env.DISCORD_SECRET}`,
       },
       body: formData,
-    });
-  } catch {
-    env.logger.log('Error editing original response');
+    }
+  );
+
+  const json: any = await response.json();
+
+  if (json.errors) {
+    env.logger.setSeverity('error');
+    env.logger.setExtraData('discordResponse', json);
+    throw new Error('Error editing original response');
   }
 };
 

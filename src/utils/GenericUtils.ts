@@ -149,17 +149,13 @@ export const getMuppetsAndRespond = async ({
         );
       }
       seconds += 1;
+
       return;
     }
-
     if (uploading) {
-      await sendUpdate(interaction, env, 3, 'Uploading images');
-      clearInterval(updateInterval); // clear interval early because otherwise we might edit the message *after* our image upload is done.
+      seconds += 1;
       return;
     }
-
-    clearInterval(updateInterval);
-    return;
   }, 1000);
 
   try {
@@ -174,12 +170,14 @@ export const getMuppetsAndRespond = async ({
         descriptions.map((desc) => generateImageFromOpenAI(desc as string, env, undefined /* timeout */, typeOverride))
       )
     ).filter(isNotNull);
-    generating = false;
-    uploading = true;
     env.logger.log(`Generated ${images.length} muppets in ${seconds} seconds`);
     env.logger.setExtraData('imagesGenerated', images.length);
     env.logger.setExtraData('secondsToGenerate', seconds);
+
+    generating = false;
+    uploading = true;
     seconds = 0;
+    await sendUpdate(interaction, env, 2, 'Uploading images');
 
     if (images.length === 0) {
       env.logger.log('No images generated');
@@ -220,6 +218,8 @@ export const getMuppetsAndRespond = async ({
     const imageBlobs = await Promise.all(images.map((image) => downloadImage(image.url as string)));
     const flags = sendSilently ? MessageFlags.SuppressNotifications : undefined;
 
+    env.logger.setExtraData('finalResponseData', { attachments, content, images });
+
     if (sendToDM) {
       env.logger.log('Sending to DM');
       await sendToDMWithAttachments(
@@ -236,52 +236,38 @@ export const getMuppetsAndRespond = async ({
       await deleteOriginalResponse(interaction, env);
     } else {
       env.logger.log('Responding to original');
-      if (sendSilently) {
-        await respondToOriginalWithAttachments(
-          interaction,
+      const msg: any = {
+        attachments,
+        content,
+        flags,
+        message_reference: { message_id: target_id },
+      };
+
+      if (MUPPETIZE_COMPONENTS.length > 0) {
+        msg.components = [
           {
-            attachments,
-            content,
-            flags,
-            message_reference: { message_id: target_id },
-            components: [
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
-              },
-            ],
+            type: MessageComponentTypes.ACTION_ROW,
+            components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
           },
-          env,
-          imageBlobs
-        );
+        ];
+      }
+
+      if (sendSilently) {
+        await respondToOriginalWithAttachments(interaction, msg, env, imageBlobs);
         env.logger.log('Deleting original response');
         await deleteOriginalResponse(interaction, env);
       } else {
-        await editOriginalResponseWithAttachments(
-          interaction,
-          {
-            attachments,
-            content,
-            flags,
-            message_reference: { message_id: target_id },
-            components: [
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
-              },
-            ],
-          },
-          env,
-          imageBlobs
-        );
+        await editOriginalResponseWithAttachments(interaction, msg, env, imageBlobs);
       }
     }
 
     uploading = false;
+    clearInterval(updateInterval);
     env.logger.log(`Uploaded images in ${seconds} seconds`);
     env.logger.setExtraData('secondsToUpload', seconds);
   } catch (e) {
     console.error('Error generating muppets', e);
+    env.logger.setSeverity('error');
     await editOriginalResponse(
       interaction,
       {

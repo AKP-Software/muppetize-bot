@@ -33,6 +33,7 @@ declare interface Env {
   logger: {
     log: (message: string) => void;
     setExtraData: (key: string, value: unknown) => void;
+    setSeverity: (severity: string) => void;
     sendLogsToDatadog: (message: DatadogLogsMessage) => Promise<void>;
   };
 }
