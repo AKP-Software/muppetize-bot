@@ -11,8 +11,9 @@ import {
   APIInteraction,
 } from 'discord-api-types/payloads/v10';
 import { JsonResponse } from './utils/JsonResponse';
-import { getMuppetsAndRespond, isUserAllowed } from './utils/GenericUtils';
+import { getMuppetsAndRespond, isUserAllowed, shouldBeEphemeral } from './utils/GenericUtils';
 import DatadogLogger from './utils/DatadogLogger';
+import { getOptionValue } from './utils/InteractionOptions';
 
 const router = Router();
 const notFoundResponse = (request: any, env: Env, ctx: ExecutionContext) => {
@@ -129,9 +130,11 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
     logger.log(`Processing handler for ${cmdName}`);
     ctx.waitUntil(handler(message, env, ctx));
 
+    const flags = shouldBeEphemeral(message) ? MessageFlags.Ephemeral : undefined;
+
     return new JsonResponse({
       type: InteractionResponseType.DeferredChannelMessageWithSource,
-      data: { content: 'Warming up...' },
+      data: { content: 'Warming up...', flags },
     });
   }
 
@@ -156,7 +159,7 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
 
     return new JsonResponse({
       type: InteractionResponseType.DeferredMessageUpdate,
-      data: { content: 'Warming up...' },
+      data: { content: 'Warming up...', flags: MessageFlags.Ephemeral },
     });
   }
 });

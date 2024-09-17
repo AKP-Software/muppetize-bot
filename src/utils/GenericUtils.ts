@@ -10,11 +10,12 @@ import {
 import { getKVConfig } from './CloudflareHelpers';
 import { deleteOriginalResponse, editOriginalResponse, editOriginalResponseWithAttachments, sendUpdate } from './InteractionResponses';
 import { generateImageFromOpenAI, getImageDescriptionFromOpenAI } from './OpenAIHelpers';
-import { sendToDMWithAttachments } from './ResponseHelpers';
+import { respondToOriginalWithAttachments, sendToDMWithAttachments } from './ResponseHelpers';
 import { MessageComponentTypes } from 'discord-interactions';
 
 import components from '../components';
 import { APIUserWithStaffFlag } from '../types';
+import { getOptionValue } from './InteractionOptions';
 
 export const MUPPETIZE_COMPONENTS = components.filter((c) => c.name.startsWith('muppetize_')).sort((a, b) => a.sortIndex - b.sortIndex);
 
@@ -152,8 +153,8 @@ export const getMuppetsAndRespond = async ({
     }
 
     if (uploading) {
-      await sendUpdate(interaction, env, seconds, 'Uploading images');
-      seconds += 1;
+      await sendUpdate(interaction, env, 3, 'Uploading images');
+      clearInterval(updateInterval); // clear interval early because otherwise we might edit the message *after* our image upload is done.
       return;
     }
 
@@ -193,13 +194,9 @@ export const getMuppetsAndRespond = async ({
 
     const member = interaction?.user?.id ?? interaction.member?.user?.id;
 
-    let content = '';
+    let content = `Your ${muppet}(s) have arrived!`;
 
-    if (member) {
-      content = `<@${member}>, your ${muppet}(s) have arrived!`;
-    }
-
-    const includeMember = member && !sendToDM;
+    const includeMember = member && sendSilently && !sendToDM;
 
     if (target_id && interaction.guild_id) {
       content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this message: https://discord.com/channels/${
@@ -214,7 +211,7 @@ export const getMuppetsAndRespond = async ({
     }
 
     if (user_id) {
-      content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this user: <@${user_id}>`;
+      content = `Generated ${includeMember ? `by <@${member}> ` : ''}from this user's avatar: <@${user_id}>`;
       if (interaction.guild_id) {
         content += ` from <#${interaction.channel.id}>`;
       }
@@ -235,25 +232,49 @@ export const getMuppetsAndRespond = async ({
         env,
         imageBlobs
       );
+      env.logger.log('Deleting original response');
+      await deleteOriginalResponse(interaction, env);
     } else {
       env.logger.log('Responding to original');
-      await editOriginalResponseWithAttachments(
-        interaction,
-        {
-          attachments,
-          content,
-          flags,
-          message_reference: { message_id: target_id },
-          components: [
-            {
-              type: MessageComponentTypes.ACTION_ROW,
-              components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
-            },
-          ],
-        },
-        env,
-        imageBlobs
-      );
+      if (sendSilently) {
+        await respondToOriginalWithAttachments(
+          interaction,
+          {
+            attachments,
+            content,
+            flags,
+            message_reference: { message_id: target_id },
+            components: [
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
+              },
+            ],
+          },
+          env,
+          imageBlobs
+        );
+        env.logger.log('Deleting original response');
+        await deleteOriginalResponse(interaction, env);
+      } else {
+        await editOriginalResponseWithAttachments(
+          interaction,
+          {
+            attachments,
+            content,
+            flags,
+            message_reference: { message_id: target_id },
+            components: [
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: MUPPETIZE_COMPONENTS.map((c) => c.component({ user: interaction.user ?? interaction.member!.user })),
+              },
+            ],
+          },
+          env,
+          imageBlobs
+        );
+      }
     }
 
     uploading = false;
@@ -269,4 +290,15 @@ export const getMuppetsAndRespond = async ({
       env
     );
   }
+};
+
+export const shouldBeEphemeral = (interaction: APIApplicationCommandInteraction) => {
+  if (interaction.data.name === 'Muppetize to DM' || interaction.data.name === 'Muppetize Silently') {
+    return true;
+  }
+
+  const dm = getOptionValue(interaction, 'dm') as boolean;
+  const silent = getOptionValue(interaction, 'silent') as boolean;
+
+  return dm || silent;
 };

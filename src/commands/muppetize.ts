@@ -58,7 +58,7 @@ const muppetizeHandler = async (
       interaction,
       {
         content:
-          "Error: That message doesn't contain a valid image! Please make sure your image is below 20 MB in size and is of one the following formats: ['png', 'jpeg', 'gif', 'webp'].",
+          "Error: That message doesn't contain a valid image! Please make sure your image is smaller than 20 MB, and is of one the following formats: ['png', 'jpeg', 'gif', 'webp'].",
       },
       env
     );
