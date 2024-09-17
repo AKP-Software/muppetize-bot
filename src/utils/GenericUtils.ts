@@ -265,6 +265,8 @@ export const getMuppetsAndRespond = async ({
     clearInterval(updateInterval);
     env.logger.log(`Uploaded images in ${seconds} seconds`);
     env.logger.setExtraData('secondsToUpload', seconds);
+
+    return { interaction, image: attachment, attachments, imageBlobs };
   } catch (e) {
     console.error('Error generating muppets', e);
     env.logger.setSeverity('error');

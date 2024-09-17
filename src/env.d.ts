@@ -23,17 +23,14 @@ declare interface Env {
   DISCORD_SECRET: string;
   DATADOG_SECRET: string;
   OPENAI_SECRET: string;
-  OPENAI_ENDPOINT: string;
-  OPENAI_VISION_MODEL: string;
-  OPENAI_DALLE_MODEL: string;
-  GPT_VISION_PROMPT: string;
-  DALL_E_PROMPT: string;
   ENVIRONMENT: 'production' | 'development';
 
   logger: {
     log: (message: string) => void;
     setExtraData: (key: string, value: unknown) => void;
+    getExtraData: (key: string) => unknown;
     setSeverity: (severity: string) => void;
+    getSeverity: () => string;
     sendLogsToDatadog: (message: DatadogLogsMessage) => Promise<void>;
   };
 }

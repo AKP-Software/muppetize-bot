@@ -13,7 +13,7 @@ import {
 import { JsonResponse } from './utils/JsonResponse';
 import { getMuppetsAndRespond, isUserAllowed, shouldBeEphemeral } from './utils/GenericUtils';
 import DatadogLogger from './utils/DatadogLogger';
-import { getOptionValue } from './utils/InteractionOptions';
+import DiscordLogger from './utils/DiscordLogger';
 
 const router = Router();
 const notFoundResponse = (request: any, env: Env, ctx: ExecutionContext) => {
@@ -200,8 +200,12 @@ export default {
       env.logger = logger;
       logger.log('Processing message...');
       await getMuppetsAndRespond({ ...message.body, env })
-        .then(() => {
+        .then(async (data) => {
           message.ack();
+          if (data == null) return;
+
+          // @ts-ignore - types technically mismatch here but it still works.
+          await DiscordLogger.log({ env, ...data });
         })
         .catch(() => {
           message.retry();

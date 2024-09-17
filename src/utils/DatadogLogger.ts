@@ -49,8 +49,16 @@ class Logger {
     this.extraData[key] = value;
   }
 
+  public getExtraData(key: string) {
+    return this.extraData[key];
+  }
+
   public setSeverity(severity: string) {
     this.severity = severity;
+  }
+
+  public getSeverity() {
+    return this.severity;
   }
 
   public async sendLogsToDatadog({ request, response, interaction, env, queueParameters }: DatadogLogsMessage) {

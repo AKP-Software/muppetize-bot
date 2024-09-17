@@ -14,6 +14,7 @@ export const getKVConfig = async (env: Env) => {
   const openAiDalleModel = (await env.CONFIG.get('OPENAI_DALLE_MODEL', 'text')) ?? 'dall-e-3';
   const userAllowlist = (await env.CONFIG.get('USER_ALLOWLIST', 'json')) as string[] | null;
   const guildAllowlist = (await env.CONFIG.get('GUILD_ALLOWLIST', 'json')) as string[] | null;
+  const discordLoggerEndpoint = await env.CONFIG.get('DISCORD_LOGGER_ENDPOINT', 'text');
 
   return {
     adminUsers,
@@ -24,5 +25,6 @@ export const getKVConfig = async (env: Env) => {
     openAiDalleModel,
     userAllowlist,
     guildAllowlist,
+    discordLoggerEndpoint,
   };
 };
