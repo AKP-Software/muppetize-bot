@@ -8,9 +8,9 @@ import {
   StickerFormatType,
 } from 'discord-api-types/v10';
 import { getKVConfig } from './CloudflareHelpers';
-import { deleteOriginalResponse, editOriginalResponse, sendUpdate } from './InteractionResponses';
+import { deleteOriginalResponse, editOriginalResponse, editOriginalResponseWithAttachments, sendUpdate } from './InteractionResponses';
 import { generateImageFromOpenAI, getImageDescriptionFromOpenAI } from './OpenAIHelpers';
-import { respondToOriginalWithAttachments, sendToDMWithAttachments } from './ResponseHelpers';
+import { sendToDMWithAttachments } from './ResponseHelpers';
 import { MessageComponentTypes } from 'discord-interactions';
 
 import components from '../components';
@@ -237,7 +237,7 @@ export const getMuppetsAndRespond = async ({
       );
     } else {
       env.logger.log('Responding to original');
-      await respondToOriginalWithAttachments(
+      await editOriginalResponseWithAttachments(
         interaction,
         {
           attachments,
@@ -259,15 +259,12 @@ export const getMuppetsAndRespond = async ({
     uploading = false;
     env.logger.log(`Uploaded images in ${seconds} seconds`);
     env.logger.setExtraData('secondsToUpload', seconds);
-
-    env.logger.log('Deleting original response');
-    await deleteOriginalResponse(interaction, env);
   } catch (e) {
     console.error('Error generating muppets', e);
     await editOriginalResponse(
       interaction,
       {
-        content: 'Error: something went wrong, try again later.',
+        content: 'Error: something went wrong, please try again later.',
       },
       env
     );

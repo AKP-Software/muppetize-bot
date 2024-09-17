@@ -6,6 +6,7 @@ import {
   MessageFlags,
 } from 'discord-api-types/v10';
 import { DiscordRequest } from './DiscordRequest';
+import { BlobLike } from 'openai/uploads';
 
 export const sendUpdate = async (interaction: APIApplicationCommandInteraction, env: Env, secondsGenerating: number, message: string) => {
   const ellipsis = ['.', '..', '...'][secondsGenerating % 3];
@@ -63,6 +64,28 @@ export const editOriginalResponse = async (interaction: APIInteraction, body: un
       },
       jsonBody: body,
       env,
+    });
+  } catch {
+    env.logger.log('Error editing original response');
+  }
+};
+
+export const editOriginalResponseWithAttachments = async (interaction: APIInteraction, body: unknown, env: Env, imageBlobs: BlobLike[]) => {
+  try {
+    const formData = new FormData();
+    formData.append('payload_json', JSON.stringify(body));
+
+    imageBlobs.forEach((blob, index) => {
+      // @ts-ignore - types technically mismatch here but it still works.
+      formData.append(`files[${index}]`, blob, 'muppet.png');
+    });
+
+    await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bot ${env.DISCORD_SECRET}`,
+      },
+      body: formData,
     });
   } catch {
     env.logger.log('Error editing original response');

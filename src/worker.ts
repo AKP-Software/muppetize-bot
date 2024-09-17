@@ -122,7 +122,7 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
       logger.log(`User does not have permission to use ${cmdName}`);
       return new JsonResponse({
         type: InteractionResponseType.ChannelMessageWithSource,
-        data: { content: 'You are not allowed to use this command.', flags: MessageFlags.Ephemeral },
+        data: { content: "This maze isn't meant for you.", flags: MessageFlags.Ephemeral },
       });
     }
 
@@ -131,7 +131,7 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
 
     return new JsonResponse({
       type: InteractionResponseType.DeferredChannelMessageWithSource,
-      data: { content: 'Warming up...', flags: MessageFlags.Ephemeral },
+      data: { content: 'Warming up...' },
     });
   }
 
@@ -156,7 +156,7 @@ router.post('/interaction', async (request, env: Env, ctx: ExecutionContext) => 
 
     return new JsonResponse({
       type: InteractionResponseType.DeferredMessageUpdate,
-      data: { flags: MessageFlags.Ephemeral, content: 'Warming up...' },
+      data: { content: 'Warming up...' },
     });
   }
 });
