@@ -6,12 +6,14 @@ import { getOptionValue } from './InteractionOptions';
 export default class DiscordLogger {
   public static async log({
     interaction,
+    target,
     env,
     imageBlobs,
     image,
     attachments,
   }: {
     interaction: APIApplicationCommandInteraction;
+    target?: string;
     env: Env;
     imageBlobs: Blob[];
     image: APIAttachment;
@@ -48,7 +50,7 @@ export default class DiscordLogger {
       fields: [
         {
           name: 'User',
-          value: `<@${interaction.member!.user.id}>`,
+          value: `<@${user!.id}>`,
           inline: true,
         },
         {
@@ -56,6 +58,11 @@ export default class DiscordLogger {
           value: interaction.data.name,
           inline: true,
         },
+      ],
+    };
+
+    if (interaction.guild_id != null) {
+      embed.fields?.push(
         {
           name: 'Channel',
           value: `<#${interaction.channel.id}>`,
@@ -65,24 +72,33 @@ export default class DiscordLogger {
           name: 'Guild ID',
           value: interaction.guild_id ?? 'DM',
           inline: true,
-        },
-        {
-          name: 'Images Generated',
-          value: `${attachments.length}`,
-          inline: true,
-        },
-        {
-          name: 'Generation Time',
-          value: (env.logger.getExtraData('secondsToGenerate') as string) ?? 'Unknown',
-          inline: true,
-        },
-        {
-          name: 'Upload Time',
-          value: (env.logger.getExtraData('secondsToUpload') as string) ?? 'Unknown',
-          inline: true,
-        },
-      ],
-    };
+        }
+      );
+    } else {
+      embed.fields?.push({
+        name: 'Guild ID',
+        value: 'In a DM',
+        inline: true,
+      });
+    }
+
+    embed.fields?.push(
+      {
+        name: 'Images Generated',
+        value: `${attachments.length}`,
+        inline: true,
+      },
+      {
+        name: 'Generation Time',
+        value: (env.logger.getExtraData('secondsToGenerate') as string) ?? 'Unknown',
+        inline: true,
+      },
+      {
+        name: 'Upload Time',
+        value: (env.logger.getExtraData('secondsToUpload') as string) ?? 'Unknown',
+        inline: true,
+      }
+    );
 
     if (interaction.data.name === 'muppetize') {
       const dm = getOptionValue(interaction, 'dm') as boolean;
@@ -106,6 +122,14 @@ export default class DiscordLogger {
           inline: true,
         }
       );
+    }
+
+    if (target != null) {
+      embed.fields?.splice(1, 0, {
+        name: 'Target User',
+        value: `<@${target}>`,
+        inline: true,
+      });
     }
 
     const body: RESTPostAPIChannelMessageJSONBody = {

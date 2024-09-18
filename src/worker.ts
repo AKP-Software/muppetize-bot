@@ -208,7 +208,7 @@ export default {
           }
 
           // @ts-ignore - types technically mismatch here but it still works.
-          await DiscordLogger.log({ env, ...data });
+          await DiscordLogger.log({ env, target: message.body.user_id, ...data });
         })
         .catch(() => {
           message.retry();
